@@ -7,29 +7,40 @@ import json
 def clientCreate(name):
     return MongoClient("mongodb+srv://Jackie:e0dG51i6aWL6k2WG@cluster.kce3k.mongodb.net/"+name+"?retryWrites=true&w=majority")
 
+def collCreate(name, client):
+    db = client[name]
+    coll = db[name+'Coll']
+    return coll
+
+def openf(jsonFile):
+    with open('data/'+jsonFile+'.json', 'r', encoding='utf-8') as data:
+        jsonList = json.load(data)
+        return jsonList
+
+def insert(dataJSON, st):
+    for state in dataJSON:
+        st.insert_one(state)
+
 client1 = clientCreate('gas')
 client2 = clientCreate('heatSupply')
 client3 = clientCreate('sewerage')
 client4 = clientCreate('smn')
 client5 = clientCreate('water')
 
-# hsDB = client2['heatSupply']
-# hsColl = hsDB['heatSupplyColl']
-
-def collCreate(name, client):
-    db = client[name]
-    coll = db[name+'Coll']
-    return coll
-
+gasState = collCreate('gas',client1)
 hsState = collCreate('heatSupply',client2)
+sewerageState = collCreate('sewerage',client3)
+smnState = collCreate('smn',client4)
+waterState = collCreate('water',client5)
 
-def openf(jsonk):
-    with open('data/'+jsonk+'.json', 'r', encoding='utf-8') as data:
-        jsonS = json.load(data)
-        return jsonS
-
+gasJSON = openf('GasSupplyNetworks')
 hsJSON = openf('HeatSupplyNetworks')
+sewerageJSON = openf('SewerageNetworks')
+smnJSON = openf('ShareOfModernNetworks')
+waterJSON = openf('WaterSupplyNetworks')
 
-for state in hsJSON:
-    # print(state)
-    hsState.insert_one(state)
+insert(gasJSON, gasState)
+insert(hsJSON, hsState)
+insert(sewerageJSON, sewerageState)
+insert(smnJSON, smnState)
+insert(waterJSON, waterState)
